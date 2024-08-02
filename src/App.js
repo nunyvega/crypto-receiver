@@ -1,8 +1,8 @@
 // src/App.js
 import React, { useEffect, useState } from "react";
 import QRCode from "qrcode.react";
-import { formatEther } from "ethers"; // Direct import for formatEther
-import { provider } from "./ethereum"; // Import the provider
+import { formatEther, isAddress } from "ethers";
+import { provider } from "./ethereum";
 
 const App = () => {
 	const [walletAddress, setWalletAddress] = useState("");
@@ -10,6 +10,7 @@ const App = () => {
 	const [transactions, setTransactions] = useState([]);
 	const [hasMetaMask, setHasMetaMask] = useState(false);
 	const [metaMaskAddress, setMetaMaskAddress] = useState(null);
+	const [isAddressValid, setIsAddressValid] = useState(true);
 
 	useEffect(() => {
 		// Detect MetaMask
@@ -19,8 +20,8 @@ const App = () => {
 	}, []);
 
 	useEffect(() => {
-		if (walletAddress) {
-			// Fetch wallet balance and transactions
+		if (walletAddress && isAddress(walletAddress)) {
+			// Fetch wallet balance and transactions only if the address is valid
 			const fetchBalanceAndTransactions = async () => {
 				try {
 					const balance = await provider.getBalance(walletAddress);
@@ -56,7 +57,9 @@ const App = () => {
 	};
 
 	const handleAddressChange = (event) => {
-		setWalletAddress(event.target.value);
+		const address = event.target.value;
+		setWalletAddress(address);
+		setIsAddressValid(isAddress(address)); // Validate the address format
 	};
 
 	return (
@@ -83,9 +86,14 @@ const App = () => {
 					placeholder="0x1234..."
 					style={{ width: "300px", marginLeft: "10px" }}
 				/>
+				{!isAddressValid && walletAddress && (
+					<p style={{ color: "red" }}>
+						Invalid Ethereum address format.
+					</p>
+				)}
 			</div>
 
-			{walletAddress && (
+			{isAddressValid && walletAddress && (
 				<div>
 					<p>Donate to this address using the QR code below:</p>
 					<QRCode value={walletAddress} size={256} />

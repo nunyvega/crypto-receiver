@@ -4,32 +4,10 @@ import QRCode from "qrcode.react";
 import { formatEther, isAddress } from "ethers";
 import { provider } from "./ethereum";
 import axios from "axios";
-
-// Add styles for the modal
-const modalStyles = {
-	position: "fixed",
-	top: "50%",
-	left: "50%",
-	transform: "translate(-50%, -50%)",
-	width: "80%",
-	height: "80%",
-	backgroundColor: "#fff",
-	boxShadow: "0 5px 15px rgba(0,0,0,.5)",
-	zIndex: 1000,
-};
-
-const overlayStyles = {
-	position: "fixed",
-	top: 0,
-	left: 0,
-	right: 0,
-	bottom: 0,
-	backgroundColor: "rgba(0, 0, 0, 0.7)",
-	zIndex: 1000,
-};
+import "./App.css"; // Import the component-specific styles
 
 const ETHERSCAN_API_KEY = process.env.REACT_APP_ETHERSCAN_API_KEY;
-
+const COINBASE_CHECKOUT_ID = process.env.REACT_APP_COINBASE_CHECKOUT_ID;
 const App = () => {
 	const [walletAddress, setWalletAddress] = useState("");
 	const [balance, setBalance] = useState(0);
@@ -38,6 +16,31 @@ const App = () => {
 	const [metaMaskAddress, setMetaMaskAddress] = useState(null);
 	const [isAddressValid, setIsAddressValid] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	// Modal and overlay styles
+	const modalStyles = {
+		position: "fixed",
+		top: "50%",
+		left: "50%",
+		transform: "translate(-50%, -50%)",
+		width: "80%",
+		height: "80%",
+		backgroundColor: "#fff",
+		boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
+		zIndex: 1001,
+		overflow: "hidden",
+		borderRadius: "8px",
+	};
+
+	const overlayStyles = {
+		position: "fixed",
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		backgroundColor: "rgba(0, 0, 0, 0.7)",
+		zIndex: 1000,
+	};
 
 	useEffect(() => {
 		// Detect MetaMask
@@ -103,12 +106,12 @@ const App = () => {
 	};
 
 	return (
-		<div style={{ padding: "20px" }}>
+		<div className="app-container">
 			<h1>Donation Platform</h1>
 
 			<div>
 				{hasMetaMask && (
-					<button onClick={connectMetaMask}>
+					<button className="button" onClick={connectMetaMask}>
 						{metaMaskAddress
 							? "Connected: " + metaMaskAddress
 							: "Connect MetaMask"}
@@ -116,7 +119,7 @@ const App = () => {
 				)}
 			</div>
 
-			<div>
+			<div className="input-group">
 				<label htmlFor="walletAddress">Enter Wallet Address:</label>
 				<input
 					type="text"
@@ -124,7 +127,6 @@ const App = () => {
 					value={walletAddress}
 					onChange={handleAddressChange}
 					placeholder="0x1234..."
-					style={{ width: "300px", marginLeft: "10px" }}
 				/>
 				{!isAddressValid && walletAddress && (
 					<p style={{ color: "red" }}>
@@ -135,12 +137,14 @@ const App = () => {
 
 			{isAddressValid && walletAddress && (
 				<div>
-					<p>Donate to this address using the QR code below:</p>
+					<p className="qr-code">
+						Donate to this address using the QR code below:
+					</p>
 					<QRCode value={walletAddress} size={256} />
 					<h2>Wallet Balance: {balance} SepoliaETH</h2>
 					<h3>Recent Transactions:</h3>
 					{transactions.length > 0 ? (
-						<ul>
+						<ul className="transaction-list">
 							{transactions.map((tx) => (
 								<li key={tx.hash}>
 									<a
@@ -162,7 +166,9 @@ const App = () => {
 			)}
 
 			<div>
-				<button onClick={toggleModal}>Open Coinbase Checkout</button>
+				<button className="button" onClick={toggleModal}>
+					Donate with coinbase
+				</button>
 			</div>
 
 			{isModalOpen && (
@@ -170,17 +176,18 @@ const App = () => {
 					<div style={overlayStyles} onClick={toggleModal}></div>
 					<div style={modalStyles}>
 						<iframe
-							src="https://commerce.coinbase.com/pay/0186830c-ced5-4fa1-af8a-e1b3fca6a023"
+							src="https://commerce.coinbase.com/pay/${COINBASE_CHECKOUT_ID}"
 							title="Coinbase Checkout"
 							width="100%"
 							height="100%"
 							frameBorder="0"
+							style={{ border: "none" }}
 						></iframe>
 						<button
+							className="modal-close-button"
 							onClick={toggleModal}
-							style={{ position: "absolute", top: 10, right: 10 }}
 						>
-							Close
+							✖
 						</button>
 					</div>
 				</>

@@ -7,7 +7,7 @@ const privateKey = process.env.REACT_APP_PRIVATE_KEY;
 
 // Connect to Ethereum network
 const provider = new JsonRpcProvider(
-	`https://mainnet.infura.io/v3/${infuraProjectId}`
+	`https://sepolia.infura.io/v3/${infuraProjectId}`
 );
 
 // Create or use an existing wallet
